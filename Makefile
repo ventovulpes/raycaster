@@ -1,0 +1,23 @@
+CFLAGS = -Wall -Wextra -Wpedantic -std=c11
+
+TARGET = raycaster
+SRC = src/main.c src/player.c
+OBJ = $(SRC:.c=.o)
+
+$(TARGET): $(OBJ)
+	cc $(CFLAGS) $(OBJ) -o $(TARGET)
+
+%.o: %.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+run: $(TARGET)
+	./$(TARGET)
+
+.PHONY: clean test
+
+test: tests/test_main.c src/player.c
+	cc $(CFLAGS) -Isrc tests/test_main.c src/player.c -o tests/test_main
+	./tests/test_main
+
+clean:
+	rm -f $(OBJ) $(TARGET) tests/test_main
