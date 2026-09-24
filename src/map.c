@@ -13,7 +13,7 @@ Map map_create(size_t height, size_t width) {
     Map map = {
         .height = height,
         .width = width,
-        .data = (CellType *)malloc(height * width * sizeof *map.data),
+        .cells = (CellType *)malloc(height * width * sizeof *map.cells),
     };
 
     return map;
@@ -61,19 +61,20 @@ bool map_calc_dimensions(char *file_name, size_t *height, size_t *width) {
     return true;
 }
 
-// Initializes `map`'s data based on the given file.
-void map_data_init(CellType *data, char *file_name, size_t height,
+// Initializes `map`'s cells based on the given file.
+bool map_data_init(CellType *cells, char *file_name, size_t height,
                    size_t width) {
     FILE *f = fopen(file_name, "r");
     if (f == NULL) {
         perror("error reading file");
-        return;
+        return false;
     }
 
     for (size_t i = 0; i < width; i++) {
-        data[i] = WALL;
+        cells[i] = WALL;
     }
 
+    bool found_player = false;
     for (size_t i = 1; i < height - 1; i++) {
         char line[BUFFER_SIZE];
         fgets(line, BUFFER_SIZE, f);
@@ -82,7 +83,7 @@ void map_data_init(CellType *data, char *file_name, size_t height,
         for (size_t j = 0; j < width; j++) {
             // add surrounding walls
             if (j == 0 || j == width - 1) {
-                data[width * i + j] = WALL;
+                cells[width * i + j] = WALL;
                 continue;
             }
 
@@ -95,18 +96,31 @@ void map_data_init(CellType *data, char *file_name, size_t height,
                 cell = WALL;
                 break;
             case 'P':
+                if (found_player) {
+                    perror(
+                        "cannot initialize map with more than one P character");
+                    fclose(f);
+                    return false;
+                }
+                found_player = true;
                 cell = PLAYER;
                 break;
             }
 
-            data[width * i + j] = cell;
+            cells[width * i + j] = cell;
             ch++;
         }
     }
 
     for (size_t i = 0; i < width; i++) {
-        data[width * (height - 1) + i] = WALL;
+        cells[width * (height - 1) + i] = WALL;
     }
 
     fclose(f);
+
+    if (!found_player) {
+        perror("file must contain one P character to initialize map");
+        return false;
+    }
+    return true;
 }
