@@ -1,7 +1,8 @@
 CFLAGS = -Wall -Wextra -Wpedantic -std=c11
 
 TARGET = raycaster
-SRC = src/main.c src/player.c
+AUX = src/player.c src/map.c
+SRC = src/main.c $(AUX)
 OBJ = $(SRC:.c=.o)
 
 $(TARGET): $(OBJ)
@@ -16,7 +17,7 @@ run: $(TARGET)
 .PHONY: clean test
 
 test: tests/test_main.c src/player.c
-	cc $(CFLAGS) -Isrc tests/test_main.c src/player.c -o tests/test_main
+	cc $(CFLAGS) -Isrc tests/test_main.c $(AUX) -o tests/test_main
 	./tests/test_main
 
 clean:
