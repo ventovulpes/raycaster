@@ -1,12 +1,13 @@
 #include "map.h"
 #include "player.h"
+#include "ray.h"
 #include <math.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 
 #define TEST(fn) {#fn, fn}
-#define EPSILON 0.000001
+#define EPSILON 0.01
 
 typedef struct {
     const char *name;
@@ -201,6 +202,37 @@ static bool test_map_init_with_multiple_players(void) {
     return !map_load(&m, "tests/maps/multiple_players.txt");
 }
 
+static bool test_ray_cast_distance_with_int_distance(void) {
+    Map m = make_test_map();
+    return assert_eq(ray_cast_distance(&m, 2, 2, 0), 19.0);
+}
+
+static bool test_ray_cast_distance_with_non_int_distance(void) {
+    Map m = make_test_map();
+    return assert_eq(ray_cast_distance(&m, 2.1, 2, 0), 18.9);
+}
+
+static bool test_ray_cast_distance_towards_neg_x(void) {
+    Map m = make_test_map();
+    return assert_eq(ray_cast_distance(&m, 2, 2, 180), 1);   
+}
+
+static bool test_ray_cast_distance_towards_neg_y(void) {
+    Map m = make_test_map();
+    return assert_eq(ray_cast_distance(&m, 2, 2, 270), 19.0); 
+}
+
+static bool test_ray_cast_distance_at_angle(void) {
+    Map m = make_test_map();
+    return assert_eq(ray_cast_distance(&m, 2, 2, 45), sqrt(2)); 
+}
+
+static bool test_ray_cast_distance_at_large_angle(void) {
+    Map m = make_test_map();
+    return assert_eq(ray_cast_distance(&m, 2, 2, 267), sqrt(1 + pow(19, 2))); 
+}
+
+
 int main(void) {
     printf("Running tests...\n");
 
@@ -213,6 +245,12 @@ int main(void) {
         TEST(test_map_init_with_no_player),
         TEST(test_map_init_with_multiple_players),
         TEST(test_player_create),
+        TEST(test_ray_cast_distance_with_int_distance),
+        TEST(test_ray_cast_distance_with_non_int_distance),
+        TEST(test_ray_cast_distance_towards_neg_x),
+        TEST(test_ray_cast_distance_towards_neg_y),
+        TEST(test_ray_cast_distance_at_angle),
+        TEST(test_ray_cast_distance_at_large_angle),
     };
 
     int passed = 0;

@@ -2,8 +2,7 @@
 #define PLAYER_H
 
 #include "map.h"
-
-#define PI 3.14159265358979323846
+#include "ray.h"
 
 typedef struct {
     double x;

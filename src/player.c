@@ -7,7 +7,7 @@
 // `direction = 0`. If there is no `PLAYER` in the given map, sets the `Player`
 // coordinates to first empty cell.
 Player player_create(Map *map) {
-    double x, y;
+    size_t x, y;
     bool found_empty = false;
     for (size_t i = 0; i < map->height; i++) {
         for (size_t j = 0; j < map->width; j++) {
@@ -24,10 +24,11 @@ Player player_create(Map *map) {
         }
     }
 found_player:
+    map->cells[y * map->width + x] = EMPTY;
     return (Player){
-        .x = x,
-        .y = y,
-        .direction = 0,
+        .x = (double)x,
+        .y = (double)y,
+        .direction = 0.0,
     };
 }
 
