@@ -89,6 +89,10 @@ static bool assert_cell_array_eq(CellType *actual, CellType *expected,
     return res;
 }
 
+// Player with:
+// `x = 0`
+// `y = 0`
+// `direction = 0`
 static Player make_test_player(void) {
     return (Player){
         .x = 0,
@@ -97,9 +101,30 @@ static Player make_test_player(void) {
     };
 }
 
+// 22x22 map with player at `(10, 10)`
+static Map make_test_map(void) {
+    Map m;
+    map_load(&m, "tests/maps/large.txt");
+    return m;
+}
+
+static bool test_player_create(void) {
+    Map map;
+    map_load(&map, "tests/maps/map1.txt");
+
+    Player p = player_create(&map);
+    Player expected = {
+        .x = 1,
+        .y = 3,
+        .direction = 0,
+    };
+    return assert_player_eq(&p, &expected);
+}
+
 static bool test_player_move_forward(void) {
     Player p = make_test_player();
-    player_move_forward(&p, 10);
+    Map m = make_test_map();
+    player_move_forward(&p, &m, 10);
 
     Player expected = {
         .x = 10,
@@ -111,8 +136,9 @@ static bool test_player_move_forward(void) {
 
 static bool test_player_turn_left_and_move_forward(void) {
     Player p = make_test_player();
+    Map m = make_test_map();
     player_turn_left(&p, 45);
-    player_move_forward(&p, 1);
+    player_move_forward(&p, &m, 1);
 
     Player expected = {
         .x = sqrt(2) / 2.0,
@@ -124,8 +150,9 @@ static bool test_player_turn_left_and_move_forward(void) {
 
 static bool test_player_turn_right_and_move_forward(void) {
     Player p = make_test_player();
+    Map m = make_test_map();
     player_turn_right(&p, 45);
-    player_move_forward(&p, 1);
+    player_move_forward(&p, &m, 1);
 
     Player expected = {
         .x = sqrt(2) / 2.0,
@@ -137,49 +164,20 @@ static bool test_player_turn_right_and_move_forward(void) {
 
 static bool test_player_turn_around_and_move_forward(void) {
     Player p = make_test_player();
+    Map m = make_test_map();
     player_turn_right(&p, 180);
-    player_move_forward(&p, 10);
+    player_move_forward(&p, &m, 1);
 
     Player expected = {
-        .x = -10,
+        .x = -1,
         .y = 0,
         .direction = PI,
     };
     return assert_player_eq(&p, &expected);
 }
 
-static bool test_map_calc_dimensions(void) {
-    size_t height = 0;
-    size_t width = 0;
-    return map_calc_dimensions("tests/maps/map1.txt", &height, &width) &&
-           assert_eq(height, 6) && assert_eq(width, 12);
-}
-
-static bool test_map_calc_dimensions_with_invalid_chars(void) {
-    size_t height = 0;
-    size_t width = 0;
-    return !map_calc_dimensions("tests/maps/invalid_chars.txt", &height,
-                                &width);
-}
-
-static bool test_map_calc_dimensions_with_ragged_map(void) {
-    size_t height = 0;
-    size_t width = 0;
-    return map_calc_dimensions("tests/maps/ragged.txt", &height, &width) &&
-           assert_eq(height, 5) && assert_eq(width, 6);
-}
-
-static bool test_map_calc_dimensions_with_small_map(void) {
-    size_t height = 0;
-    size_t width = 0;
-    return map_calc_dimensions("tests/maps/small.txt", &height, &width) &&
-           assert_eq(height, 3) && assert_eq(width, 3);
-}
-
-static bool test_map_init(void) {
-    size_t height = 12;
-    size_t width = 6;
-    Map map = map_create(width, height);
+static bool test_map_load(void) {
+    Map map;
     // clang-format off
     CellType expected[6 * 12] = {
         WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL, 
@@ -190,36 +188,17 @@ static bool test_map_init(void) {
         WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL, 
     };
     // clang-format off
-    return map_data_init(map.cells, "tests/maps/map1.txt", width, height) && assert_cell_array_eq(map.cells, expected, width, height);
+    return map_load(&map, "tests/maps/map1.txt") && assert_cell_array_eq(map.cells, expected, 6, 12);
 }
 
 static bool test_map_init_with_no_player(void) {
-    size_t height = 5;
-    size_t width = 5;
-    Map map = map_create(width, height);
-    return !map_data_init(map.cells, "tests/maps/no_player.txt", height, width);
+    Map m;
+    return !map_load(&m, "tests/maps/no_player.txt");
 }
 
 static bool test_map_init_with_multiple_players(void) {
-    size_t height = 5;
-    size_t width = 5;
-    Map map = map_create(width, height);
-    return !map_data_init(map.cells, "tests/maps/multiple_players.txt", height, width);
-}
-
-static bool test_player_create(void) {
-    size_t height = 12;
-    size_t width = 6;
-    Map map = map_create(width, height);
-    map_data_init(map.cells, "tests/maps/map1.txt", width, height);
-    
-    Player p = player_create(&map);
-    Player expected = {
-        .x = 1,
-        .y = 3,
-        .direction = 0,
-    };
-    return assert_player_eq(&p, &expected);
+    Map m;
+    return !map_load(&m, "tests/maps/multiple_players.txt");
 }
 
 int main(void) {
@@ -230,11 +209,7 @@ int main(void) {
         TEST(test_player_turn_left_and_move_forward),
         TEST(test_player_turn_right_and_move_forward),
         TEST(test_player_turn_around_and_move_forward),
-        TEST(test_map_calc_dimensions),
-        TEST(test_map_calc_dimensions_with_invalid_chars),
-        TEST(test_map_calc_dimensions_with_ragged_map),
-        TEST(test_map_calc_dimensions_with_small_map),
-        TEST(test_map_init),
+        TEST(test_map_load),
         TEST(test_map_init_with_no_player),
         TEST(test_map_init_with_multiple_players),
         TEST(test_player_create),

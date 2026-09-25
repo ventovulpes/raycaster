@@ -31,9 +31,12 @@ found_player:
     };
 }
 
-void player_move_forward(Player *player, double distance) {
-    player->x += cos(player->direction) * distance;
-    player->y += sin(player->direction) * distance;
+void player_move_forward(Player *player, Map *map, double distance) {
+    double d_x = cos(player->direction) * distance;
+    double d_y = sin(player->direction) * distance;
+
+    player->x += d_x;
+    player->y += d_y;
 }
 
 static double mod(double x, double m) { return fmod(fmod(x, m) + m, m); }

@@ -13,7 +13,7 @@ typedef struct {
 
 Player player_create(Map *map);
 
-void player_move_forward(Player *player, double distance);
+void player_move_forward(Player *player, Map *map, double distance);
 
 void player_turn_left(Player *player, double deg);
 

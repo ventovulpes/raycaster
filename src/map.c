@@ -9,7 +9,7 @@
 #define VALID_CHARS "X.P"
 
 // Creates a Map with dimensions `height` and `width`.
-Map map_create(size_t height, size_t width) {
+static Map map_create(size_t height, size_t width) {
     Map map = {
         .height = height,
         .width = width,
@@ -21,10 +21,11 @@ Map map_create(size_t height, size_t width) {
 
 // Calculates the dimensions needed for map in `file_name`. Updates `height` and
 // `width` in place.
-bool map_calc_dimensions(char *file_name, size_t *height, size_t *width) {
+static bool map_calc_dimensions(char *file_name, size_t *height,
+                                size_t *width) {
     FILE *f = fopen(file_name, "r");
     if (f == NULL) {
-        perror("error reading file");
+        fprintf(stderr, "failed to read '%s': ", file_name);
         return false;
     }
 
@@ -36,7 +37,7 @@ bool map_calc_dimensions(char *file_name, size_t *height, size_t *width) {
         size_t i = 0;
         while (*ch != '\0' && *ch != '\n') {
             if (strchr(VALID_CHARS, *ch) == NULL) {
-                perror("file contains invalid character");
+                fprintf(stderr, "file contains invalid character '%c': ", *ch);
                 fclose(f);
                 return false;
             }
@@ -62,11 +63,11 @@ bool map_calc_dimensions(char *file_name, size_t *height, size_t *width) {
 }
 
 // Initializes `map`'s cells based on the given file.
-bool map_data_init(CellType *cells, char *file_name, size_t height,
-                   size_t width) {
+static bool map_data_init(CellType *cells, char *file_name, size_t height,
+                          size_t width) {
     FILE *f = fopen(file_name, "r");
     if (f == NULL) {
-        perror("error reading file");
+        fprintf(stderr, "failed to read '%s': ", file_name);
         return false;
     }
 
@@ -123,4 +124,18 @@ bool map_data_init(CellType *cells, char *file_name, size_t height,
         return false;
     }
     return true;
+}
+
+// Creates and initializes `map` with data in the given file.
+bool map_load(Map *map, char *file_name) {
+    size_t height, width;
+    if (!map_calc_dimensions(file_name, &height, &width)) {
+        return false;
+    }
+    *map = map_create(height, width);
+    return map_data_init(map->cells, file_name, height, width);
+}
+
+CellType map_get(Map *map, size_t x, size_t y) {
+    return map->cells[map->width * y + x];
 }

@@ -16,11 +16,8 @@ typedef struct {
     CellType *cells;
 } Map;
 
-Map map_create(size_t height, size_t width);
+bool map_load(Map *map, char *file_name);
 
-bool map_calc_dimensions(char *file_name, size_t *height, size_t *width);
-
-bool map_data_init(CellType *cells, char *file_name, size_t height,
-                   size_t width);
+CellType map_get(Map *map, size_t x, size_t y);
 
 #endif
