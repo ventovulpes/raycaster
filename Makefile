@@ -1,24 +1,26 @@
 CFLAGS = -Wall -Wextra -Wpedantic -std=c11
 
-TARGET = raycaster
+TARGET = build/raycaster
 AUX = src/player.c src/map.c src/ray.c
 SRC = src/main.c $(AUX)
-OBJ = $(SRC:.c=.o)
+OBJ = $(SRC:src/%.c=build/%.o)
 
 $(TARGET): $(OBJ)
 	cc $(CFLAGS) $(OBJ) -o $(TARGET)
 
-%.o: %.c
-	$(CC) $(CFLAGS) -c $< -o $@
+build/%.o: src/%.c
+	mkdir -p build
+	cc $(CFLAGS) -c $< -o $@
 
 run: $(TARGET)
 	./$(TARGET)
 
-.PHONY: clean test
-
 test: tests/test_main.c $(AUX)
-	cc $(CFLAGS) -Isrc tests/test_main.c $(AUX) -o tests/test_main
-	./tests/test_main
+	mkdir -p build
+	cc $(CFLAGS) -Isrc tests/test_main.c $(AUX) -o build/test_main
+	./build/test_main
 
 clean:
-	rm -f $(OBJ) $(TARGET) tests/test_main
+	rm -rf build
+
+.PHONY: clean test run

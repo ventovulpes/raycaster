@@ -119,7 +119,15 @@ static bool test_player_create(void) {
         .y = 3,
         .direction = 0,
     };
-    return assert_player_eq(&p, &expected);
+
+    bool res = true;
+    for (size_t i = 0; i < map.width * map.height; i++) {
+        if (map.cells[i] == PLAYER) {
+            res = false;
+        }
+    }
+
+    return assert_player_eq(&p, &expected) && res;
 }
 
 static bool test_player_move_forward(void) {
