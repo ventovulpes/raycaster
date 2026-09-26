@@ -104,16 +104,16 @@ static Player make_test_player(void) {
 
 // 22x22 map with player at `(10, 10)`
 static Map make_test_map(void) {
-    Map m;
+    Map m = {0};
     map_load(&m, "tests/maps/large.txt");
     return m;
 }
 
 static bool test_player_create(void) {
-    Map map;
-    map_load(&map, "tests/maps/map1.txt");
+    Map m = {0};
+    map_load(&m, "tests/maps/map1.txt");
 
-    Player p = player_create(&map);
+    Player p = player_create(&m);
     Player expected = {
         .x = 1,
         .y = 3,
@@ -121,12 +121,12 @@ static bool test_player_create(void) {
     };
 
     bool res = true;
-    for (size_t i = 0; i < map.width * map.height; i++) {
-        if (map.cells[i] == PLAYER) {
+    for (size_t i = 0; i < m.width * m.height; i++) {
+        if (m.cells[i] == PLAYER) {
             res = false;
         }
     }
-
+    map_destroy(&m);
     return assert_player_eq(&p, &expected) && res;
 }
 
@@ -140,6 +140,7 @@ static bool test_player_move_forward(void) {
         .y = 1,
         .direction = 0,
     };
+    map_destroy(&m);
     return assert_player_eq(&p, &expected);
 }
 
@@ -154,6 +155,7 @@ static bool test_player_turn_left_and_move_forward(void) {
         .y = 10 - sqrt(2) / 2.0,
         .direction = PI / 4.0,
     };
+    map_destroy(&m);
     return assert_player_eq(&p, &expected);
 }
 
@@ -168,6 +170,7 @@ static bool test_player_turn_right_and_move_forward(void) {
         .y = 10 + sqrt(2) / 2.0,
         .direction = 7.0 * PI / 4.0,
     };
+    map_destroy(&m);
     return assert_player_eq(&p, &expected);
 }
 
@@ -182,6 +185,7 @@ static bool test_player_turn_around_and_move_forward(void) {
         .y = 1,
         .direction = PI,
     };
+    map_destroy(&m);
     return assert_player_eq(&p, &expected);
 }
 
@@ -195,6 +199,7 @@ static bool test_player_collide_with_wall_east(void) {
         .y = 10,
         .direction = 0,
     };
+    map_destroy(&m);
     return assert_player_eq(&p, &expected);
 }
 
@@ -209,6 +214,7 @@ static bool test_player_collide_with_wall_north(void) {
         .y = 1,
         .direction = PI / 2,
     };
+    map_destroy(&m);
     return assert_player_eq(&p, &expected);
 }
 
@@ -223,6 +229,7 @@ static bool test_player_collide_with_wall_west(void) {
         .y = 10,
         .direction = PI,
     };
+    map_destroy(&m);
     return assert_player_eq(&p, &expected);
 }
 
@@ -237,11 +244,12 @@ static bool test_player_collide_with_wall_south(void) {
         .y = 21,
         .direction = 1.5 * PI,
     };
+    map_destroy(&m);
     return assert_player_eq(&p, &expected);
 }
 
 static bool test_map_load(void) {
-    Map map;
+    Map m = {0};
     // clang-format off
     CellType expected[6 * 12] = {
         WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL, 
@@ -252,47 +260,61 @@ static bool test_map_load(void) {
         WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL, 
     };
     // clang-format off
-    return map_load(&map, "tests/maps/map1.txt") && assert_cell_array_eq(map.cells, expected, 6, 12);
+    bool res = map_load(&m, "tests/maps/map1.txt") && assert_cell_array_eq(m.cells, expected, 6, 12);
+    map_destroy(&m);
+    return res;
 }
 
 static bool test_map_init_with_no_player(void) {
-    Map m;
+    Map m = {0};
     return !map_load(&m, "tests/maps/no_player.txt");
 }
 
 static bool test_map_init_with_multiple_players(void) {
-    Map m;
+    Map m = {0};
     return !map_load(&m, "tests/maps/multiple_players.txt");
 }
 
 static bool test_ray_cast_distance_with_int_distance(void) {
     Map m = make_test_map();
-    return assert_eq(ray_cast_distance(&m, 2, 2, 0), 19.0);
+    bool res = assert_eq(ray_cast_distance(&m, 2, 2, 0), 19.0);
+    map_destroy(&m);
+    return res;
 }
 
 static bool test_ray_cast_distance_with_non_int_distance(void) {
     Map m = make_test_map();
-    return assert_eq(ray_cast_distance(&m, 2.1, 2, 0), 18.9);
+    bool res = assert_eq(ray_cast_distance(&m, 2.1, 2, 0), 18.9);
+    map_destroy(&m);
+    return res;
 }
 
 static bool test_ray_cast_distance_towards_neg_x(void) {
     Map m = make_test_map();
-    return assert_eq(ray_cast_distance(&m, 2, 2, PI), 1);   
+    bool res = assert_eq(ray_cast_distance(&m, 2, 2, PI), 1);
+    map_destroy(&m);
+    return res;
 }
 
 static bool test_ray_cast_distance_towards_neg_y(void) {
     Map m = make_test_map();
-    return assert_eq(ray_cast_distance(&m, 2, 2, 1.5 * PI), 19.0); 
+    bool res = assert_eq(ray_cast_distance(&m, 2, 2, 1.5 * PI), 19.0);
+    map_destroy(&m);
+    return res;
 }
 
 static bool test_ray_cast_distance_at_angle(void) {
     Map m = make_test_map();
-    return assert_eq(ray_cast_distance(&m, 2, 2, PI / 4), sqrt(2)); 
+    bool res = assert_eq(ray_cast_distance(&m, 2, 2, PI / 4), sqrt(2));
+    map_destroy(&m);
+    return res;
 }
 
 static bool test_ray_cast_distance_at_large_angle(void) {
     Map m = make_test_map();
-    return assert_eq(ray_cast_distance(&m, 2, 2, 4.66), sqrt(1 + pow(19, 2))); 
+    bool res = assert_eq(ray_cast_distance(&m, 2, 2, 4.66), sqrt(1 + pow(19, 2)));
+    map_destroy(&m);
+    return res;
 }
 
 
@@ -331,7 +353,7 @@ int main(void) {
     }
 
     if (passed == total) {
-        printf("\n\033[32mAll tests passed!\033[0m\n");
+        printf("\n\033[32mAll %d tests passed!\033[0m\n", total);
     } else {
         printf("\n%d/%d tests passed", passed, total);
     }

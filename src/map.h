@@ -18,6 +18,8 @@ typedef struct {
 
 bool map_load(Map *map, char *file_name);
 
+void map_destroy(Map *map);
+
 CellType map_get(Map *map, size_t x, size_t y);
 
 #endif

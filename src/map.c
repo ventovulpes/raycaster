@@ -133,7 +133,16 @@ bool map_load(Map *map, char *file_name) {
         return false;
     }
     *map = map_create(height, width);
-    return map_data_init(map->cells, file_name, height, width);
+    if (!map_data_init(map->cells, file_name, height, width)) {
+        map_destroy(map);
+        return false;
+    }
+    return true;
+}
+
+void map_destroy(Map *map) {
+    free(map->cells);
+    map->cells = NULL;
 }
 
 CellType map_get(Map *map, size_t x, size_t y) {
