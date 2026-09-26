@@ -2,16 +2,13 @@
 #include "map.h"
 #include "math.h"
 
-#define RAY_STEP 0.01
+#define RAY_STEP 0.001
 
 // Returns the distance to the nearest non empty cell by casting a ray starting
-// at `(x, y)` with `direction` (in degrees).
+// at `(x, y)` with `direction` (in radians).
 double ray_cast_distance(Map *map, double x, double y, double direction) {
-    double d_x = cos(direction * (PI / 180.0)) * RAY_STEP;
-    double d_y = -sin(direction * (PI / 180.0)) * RAY_STEP;
-
-    double (*round_x)(double) = d_x > 0 ? floor : ceil;
-    double (*round_y)(double) = d_y > 0 ? floor : ceil;
+    double d_x = cos(direction) * RAY_STEP;
+    double d_y = -sin(direction) * RAY_STEP;
 
     double cur_x = x;
     double cur_y = y;

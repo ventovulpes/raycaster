@@ -91,13 +91,13 @@ static bool assert_cell_array_eq(CellType *actual, CellType *expected,
 }
 
 // Player with:
-// `x = 0`
-// `y = 0`
+// `x = 1`
+// `y = 1`
 // `direction = 0`
 static Player make_test_player(void) {
     return (Player){
-        .x = 0,
-        .y = 0,
+        .x = 1,
+        .y = 1,
         .direction = 0,
     };
 }
@@ -128,36 +128,36 @@ static bool test_player_move_forward(void) {
     player_move_forward(&p, &m, 10);
 
     Player expected = {
-        .x = 10,
-        .y = 0,
+        .x = 11,
+        .y = 1,
         .direction = 0,
     };
     return assert_player_eq(&p, &expected);
 }
 
 static bool test_player_turn_left_and_move_forward(void) {
-    Player p = make_test_player();
     Map m = make_test_map();
+    Player p = player_create(&m);
     player_turn_left(&p, 45);
     player_move_forward(&p, &m, 1);
 
     Player expected = {
-        .x = sqrt(2) / 2.0,
-        .y = sqrt(2) / 2.0,
+        .x = 10 + sqrt(2) / 2.0,
+        .y = 10 - sqrt(2) / 2.0,
         .direction = PI / 4.0,
     };
     return assert_player_eq(&p, &expected);
 }
 
 static bool test_player_turn_right_and_move_forward(void) {
-    Player p = make_test_player();
     Map m = make_test_map();
+    Player p = player_create(&m);
     player_turn_right(&p, 45);
     player_move_forward(&p, &m, 1);
 
     Player expected = {
-        .x = sqrt(2) / 2.0,
-        .y = -sqrt(2) / 2.0,
+        .x = 10 + sqrt(2) / 2.0,
+        .y = 10 + sqrt(2) / 2.0,
         .direction = 7.0 * PI / 4.0,
     };
     return assert_player_eq(&p, &expected);
@@ -170,9 +170,64 @@ static bool test_player_turn_around_and_move_forward(void) {
     player_move_forward(&p, &m, 1);
 
     Player expected = {
-        .x = -1,
-        .y = 0,
+        .x = 1,
+        .y = 1,
         .direction = PI,
+    };
+    return assert_player_eq(&p, &expected);
+}
+
+static bool test_player_collide_with_wall_east(void) {
+    Map m = make_test_map();
+    Player p = player_create(&m);
+    player_move_forward(&p, &m, 20);
+
+    Player expected = {
+        .x = 21,
+        .y = 10,
+        .direction = 0,
+    };
+    return assert_player_eq(&p, &expected);
+}
+
+static bool test_player_collide_with_wall_north(void) {
+    Map m = make_test_map();
+    Player p = player_create(&m);
+    player_turn_left(&p, 90);
+    player_move_forward(&p, &m, 20);
+
+    Player expected = {
+        .x = 10,
+        .y = 1,
+        .direction = PI / 2,
+    };
+    return assert_player_eq(&p, &expected);
+}
+
+static bool test_player_collide_with_wall_west(void) {
+    Map m = make_test_map();
+    Player p = player_create(&m);
+    player_turn_left(&p, 180);
+    player_move_forward(&p, &m, 20);
+
+    Player expected = {
+        .x = 1,
+        .y = 10,
+        .direction = PI,
+    };
+    return assert_player_eq(&p, &expected);
+}
+
+static bool test_player_collide_with_wall_south(void) {
+    Map m = make_test_map();
+    Player p = player_create(&m);
+    player_turn_right(&p, 90);
+    player_move_forward(&p, &m, 20);
+
+    Player expected = {
+        .x = 10,
+        .y = 21,
+        .direction = 1.5 * PI,
     };
     return assert_player_eq(&p, &expected);
 }
@@ -214,22 +269,22 @@ static bool test_ray_cast_distance_with_non_int_distance(void) {
 
 static bool test_ray_cast_distance_towards_neg_x(void) {
     Map m = make_test_map();
-    return assert_eq(ray_cast_distance(&m, 2, 2, 180), 1);   
+    return assert_eq(ray_cast_distance(&m, 2, 2, PI), 1);   
 }
 
 static bool test_ray_cast_distance_towards_neg_y(void) {
     Map m = make_test_map();
-    return assert_eq(ray_cast_distance(&m, 2, 2, 270), 19.0); 
+    return assert_eq(ray_cast_distance(&m, 2, 2, 1.5 * PI), 19.0); 
 }
 
 static bool test_ray_cast_distance_at_angle(void) {
     Map m = make_test_map();
-    return assert_eq(ray_cast_distance(&m, 2, 2, 45), sqrt(2)); 
+    return assert_eq(ray_cast_distance(&m, 2, 2, PI / 4), sqrt(2)); 
 }
 
 static bool test_ray_cast_distance_at_large_angle(void) {
     Map m = make_test_map();
-    return assert_eq(ray_cast_distance(&m, 2, 2, 267), sqrt(1 + pow(19, 2))); 
+    return assert_eq(ray_cast_distance(&m, 2, 2, 4.66), sqrt(1 + pow(19, 2))); 
 }
 
 
@@ -251,6 +306,10 @@ int main(void) {
         TEST(test_ray_cast_distance_towards_neg_y),
         TEST(test_ray_cast_distance_at_angle),
         TEST(test_ray_cast_distance_at_large_angle),
+        TEST(test_player_collide_with_wall_east),
+        TEST(test_player_collide_with_wall_north),
+        TEST(test_player_collide_with_wall_west),
+        TEST(test_player_collide_with_wall_south),
     };
 
     int passed = 0;

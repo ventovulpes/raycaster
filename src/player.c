@@ -33,8 +33,14 @@ found_player:
 }
 
 void player_move_forward(Player *player, Map *map, double distance) {
+    double distance_before_obstacle =
+        ray_cast_distance(map, player->x, player->y, player->direction);
+    if (distance > distance_before_obstacle) {
+        distance = distance_before_obstacle;
+    }
+
     double d_x = cos(player->direction) * distance;
-    double d_y = sin(player->direction) * distance;
+    double d_y = -sin(player->direction) * distance;
 
     player->x += d_x;
     player->y += d_y;
