@@ -18,4 +18,4 @@ test: $(TEST)
 clean:
 	rm -rf build
 
-.PHONY: clean test run
+.PHONY: build clean test run
