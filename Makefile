@@ -1,23 +1,18 @@
 CFLAGS = -Wall -Wextra -Wpedantic -std=c11
 
 TARGET = build/raycaster
-AUX = src/player.c src/map.c src/ray.c
-SRC = src/main.c $(AUX)
-OBJ = $(SRC:src/%.c=build/%.o)
+TEST = tests/test_main.c src/player.c src/map.c src/ray.c
 
-$(TARGET): $(OBJ)
-	cc $(CFLAGS) $(OBJ) -o $(TARGET)
+build:
+	cmake -S . -B build
+	cmake --build build
 
-build/%.o: src/%.c
-	mkdir -p build
-	cc $(CFLAGS) -c $< -o $@
-
-run: $(TARGET)
+run: build
 	./$(TARGET)
 
-test: tests/test_main.c $(AUX)
+test: $(TEST)
 	mkdir -p build
-	cc $(CFLAGS) -Isrc tests/test_main.c $(AUX) -o build/test_main
+	cc $(CFLAGS) -Isrc $(TEST) -o build/test_main
 	./build/test_main
 
 clean:
