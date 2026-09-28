@@ -289,14 +289,14 @@ static bool test_ray_cast_distance_with_non_int_distance(void) {
     return res;
 }
 
-static bool test_ray_cast_distance_towards_neg_x(void) {
+static bool test_ray_cast_distance_towards_left(void) {
     Map m = make_test_map();
     bool res = assert_eq(ray_cast_distance(&m, 2, 2, PI), 1);
     map_destroy(&m);
     return res;
 }
 
-static bool test_ray_cast_distance_towards_neg_y(void) {
+static bool test_ray_cast_distance_towards_bottom(void) {
     Map m = make_test_map();
     bool res = assert_eq(ray_cast_distance(&m, 2, 2, 1.5 * PI), 19.0);
     map_destroy(&m);
@@ -332,8 +332,8 @@ int main(void) {
         TEST(test_player_create),
         TEST(test_ray_cast_distance_with_int_distance),
         TEST(test_ray_cast_distance_with_non_int_distance),
-        TEST(test_ray_cast_distance_towards_neg_x),
-        TEST(test_ray_cast_distance_towards_neg_y),
+        TEST(test_ray_cast_distance_towards_left),
+        TEST(test_ray_cast_distance_towards_bottom),
         TEST(test_ray_cast_distance_at_angle),
         TEST(test_ray_cast_distance_at_large_angle),
         TEST(test_player_collide_with_wall_east),
