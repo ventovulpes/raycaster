@@ -5,6 +5,7 @@
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
 #include <math.h>
+#include <stdio.h>
 
 typedef enum {
     WHITE = 0xFFFFFFFF,
@@ -13,11 +14,15 @@ typedef enum {
     DARK_GREEN = 0xFF199E19,
 } Color;
 
-#define CEILING WHITE
-#define FLOOR BLACK
+typedef enum { KEY_UP = 001, KEY_LEFT = 010, KEY_RIGHT = 100 } Key;
+
+#define CEILING_COLOR WHITE
+#define FLOOR_COLOR BLACK
 
 static int frame_buffer[WIDTH * HEIGHT];
 static Hit hits[WIDTH];
+// bitmap which stores which keys are being pressed
+static int keys_down = 0;
 
 void put_pixel(int x, int y, int color) {
     if (x < 0 || x >= WIDTH || y < 0 || y >= HEIGHT) {
@@ -44,9 +49,9 @@ void put_vertical_slice(int x, double distance, int color) {
     for (int i = 0; i < HEIGHT; i++) {
         int pixel_color;
         if (i < top) {
-            pixel_color = CEILING;
+            pixel_color = CEILING_COLOR;
         } else if (i > bottom) {
-            pixel_color = FLOOR;
+            pixel_color = FLOOR_COLOR;
         } else {
             pixel_color = color;
         }
@@ -54,7 +59,52 @@ void put_vertical_slice(int x, double distance, int color) {
     }
 }
 
-void fill_buffer(Map *map, Player *player) {
+void handle_input(bool *running) {
+    SDL_Event event;
+    while (SDL_PollEvent(&event)) {
+        if (event.type == SDL_EVENT_QUIT) {
+            running = false;
+        } else if (event.type == SDL_EVENT_KEY_DOWN) {
+            switch (event.key.key) {
+            case SDLK_UP:
+                keys_down |= KEY_UP;
+                break;
+            case SDLK_LEFT:
+                keys_down |= KEY_LEFT;
+                break;
+            case SDLK_RIGHT:
+                keys_down |= KEY_RIGHT;
+                break;
+            }
+        } else if (event.type == SDL_EVENT_KEY_UP) {
+            switch (event.key.key) {
+            case SDLK_UP:
+                keys_down ^= KEY_UP;
+                break;
+            case SDLK_LEFT:
+                keys_down ^= KEY_LEFT;
+                break;
+            case SDLK_RIGHT:
+                keys_down ^= KEY_RIGHT;
+                break;
+            }
+        }
+    }
+}
+
+void update_position(Player *player, Map *map) {
+    if (keys_down & KEY_UP) {
+        player_move_forward(player, map, MOVE_SPEED);
+    }
+    if (keys_down & KEY_LEFT) {
+        player_turn_left(player, TURN_SPEED);
+    }
+    if (keys_down & KEY_RIGHT) {
+        player_turn_right(player, TURN_SPEED);
+    }
+}
+
+void fill_pixel_buffer(Map *map, Player *player) {
     compute_hits(hits, map, player);
 
     clear(WHITE);
@@ -93,29 +143,19 @@ int main(void) {
         return -1;
     }
 
-    const double target_frame = 1.0 / 60.0;
-
     bool running = true;
-    int frame = 1;
-
     Map map = {0};
     map_load(&map, "tests/maps/map3.txt");
     Player player = player_create(&map);
 
-    SDL_Event event;
     while (running) {
         int start = SDL_GetPerformanceCounter();
 
-        while (SDL_PollEvent(&event)) {
-            if (event.type == SDL_EVENT_QUIT) {
-                running = false;
-            }
-        }
-        player_move_forward(&player, &map, 0.005);
-        player_turn_left(&player, 0.1);
+        handle_input(&running);
+        update_position(&player, &map);
+        fill_pixel_buffer(&map, &player);
 
-        fill_buffer(&map, &player);
-
+        // update screen
         SDL_UpdateTexture(texture, NULL, frame_buffer, WIDTH * sizeof(int));
         SDL_RenderClear(renderer);
         SDL_RenderTexture(renderer, texture, NULL, NULL);
@@ -123,14 +163,12 @@ int main(void) {
 
         int end = SDL_GetPerformanceCounter();
 
+        // cap frame rate
         double elapsed =
             (double)(end - start) / (double)SDL_GetPerformanceFrequency();
-
         if (elapsed < TARGET_FRAME_LEN) {
             SDL_Delay((int)((TARGET_FRAME_LEN - elapsed) * 1000.0));
         }
-
-        frame++;
     }
 
     SDL_DestroyTexture(texture);

@@ -10,9 +10,12 @@
 #define FOV 70
 #define FOV_RAD (FOV * PI / 180.0)
 
-#define TARGET_FPS 60.0
+#define TARGET_FPS 120.0
 #define TARGET_FRAME_LEN 1.0 / TARGET_FPS
 
 #define MIN_WALL_DISTANCE 0.3
+
+#define MOVE_SPEED (1.5 / TARGET_FPS)
+#define TURN_SPEED (45.0 / TARGET_FPS)
 
 #endif
