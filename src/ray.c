@@ -1,14 +1,15 @@
 #include "ray.h"
+#include "config.h"
+#include "map.h"
 #include "math.h"
+#include "player.h"
 #include <stdio.h>
-
-#define EPSILON 0.00001
 
 static bool approx_eq(double a, double b) { return fabs(a - b) < EPSILON; }
 
 // Returns the distance to the nearest non empty cell by casting a ray starting
 // at `(x, y)` with `direction` (in radians).
-double ray_cast_distance(Map *map, double x, double y, double direction) {
+Hit cast_ray(Map *map, double x, double y, double direction) {
     // calculates distance to nearest obstable using the DDA algorithm
 
     double d_x = cos(direction);
@@ -44,18 +45,37 @@ double ray_cast_distance(Map *map, double x, double y, double direction) {
     double cell_step_y = d_y > 0 ? 1 : -1;
     double cur_dist = 0;
 
+    Direction side;
+
     while (map_get(map, cell_x, cell_y) == EMPTY) {
         // advance in the direction which has the shortest distance
         if (x_dist < y_dist) {
             cell_x += cell_step_x;
             cur_dist = x_dist;
             x_dist += step_x;
+            side = DIRECITON_X;
         } else {
             cell_y += cell_step_y;
             cur_dist = y_dist;
             y_dist += step_y;
+            side = DIRECTION_Y;
         }
     }
 
-    return cur_dist;
+    return (Hit){
+        cur_dist,
+        side,
+        WALL,
+    };
+}
+
+// Sends `WIDTH` number of rays inside `FOV`, populating `hits` with hit data.
+void compute_hits(Hit hits[], Map *map, Player *player) {
+    double angle = player->direction - (FOV_RAD / 2);
+    double angle_step = FOV_RAD / (double)WIDTH;
+
+    for (size_t i = 0; i < WIDTH; i++) {
+        hits[i] = cast_ray(map, player->x, player->y, angle);
+        angle += angle_step;
+    }
 }

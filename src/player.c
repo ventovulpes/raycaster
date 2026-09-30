@@ -1,5 +1,7 @@
 #include "player.h"
+#include "config.h"
 #include "map.h"
+#include "ray.h"
 #include <math.h>
 #include <stdlib.h>
 
@@ -26,16 +28,16 @@ Player player_create(Map *map) {
 found_player:
     map->cells[y * map->width + x] = EMPTY;
     return (Player){
-        .x = (double)x,
-        .y = (double)y,
+        .x = (double)x + 0.5,
+        .y = (double)y + 0.5,
         .direction = 0.0,
     };
 }
 
 void player_move_forward(Player *player, Map *map, double distance) {
     double distance_before_obstacle =
-        ray_cast_distance(map, player->x, player->y, player->direction);
-    if (distance > distance_before_obstacle) {
+        cast_ray(map, player->x, player->y, player->direction).distance;
+    if (distance > distance_before_obstacle + MIN_WALL_DISTANCE) {
         distance = distance_before_obstacle;
     }
 

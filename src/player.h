@@ -1,14 +1,13 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
-#include "map.h"
-#include "ray.h"
-
-typedef struct {
+typedef struct Player {
     double x;
     double y;
     double direction;
 } Player;
+
+typedef struct Map Map;
 
 Player player_create(Map *map);
 

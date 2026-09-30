@@ -10,7 +10,7 @@ typedef enum {
     PLAYER,
 } CellType;
 
-typedef struct {
+typedef struct Map {
     size_t height;
     size_t width;
     CellType *cells;

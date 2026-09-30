@@ -3,8 +3,21 @@
 #ifndef RAY_H
 #define RAY_H
 
-#define PI 3.14159265358979323846
+typedef struct Player Player;
 
-double ray_cast_distance(Map *map, double x, double y, double direction);
+typedef enum Direction {
+    DIRECITON_X,
+    DIRECTION_Y,
+} Direction;
+
+typedef struct Hit {
+    double distance;
+    Direction side;
+    CellType object_type;
+} Hit;
+
+Hit cast_ray(Map *map, double x, double y, double direction);
+
+void compute_hits(Hit hits[], Map *map, Player *player);
 
 #endif

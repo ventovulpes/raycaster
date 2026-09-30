@@ -1,3 +1,4 @@
+#include "config.h"
 #include "map.h"
 #include "player.h"
 #include "ray.h"
@@ -7,7 +8,6 @@
 #include <stdlib.h>
 
 #define TEST(fn) {#fn, fn}
-#define EPSILON 0.01
 
 typedef struct {
     const char *name;
@@ -115,8 +115,8 @@ static bool test_player_create(void) {
 
     Player p = player_create(&m);
     Player expected = {
-        .x = 1,
-        .y = 3,
+        .x = 1.5,
+        .y = 3.5,
         .direction = 0,
     };
 
@@ -151,8 +151,8 @@ static bool test_player_turn_left_and_move_forward(void) {
     player_move_forward(&p, &m, 1);
 
     Player expected = {
-        .x = 10 + sqrt(2) / 2.0,
-        .y = 10 - sqrt(2) / 2.0,
+        .x = 10.5 + sqrt(2) / 2.0,
+        .y = 10.5 - sqrt(2) / 2.0,
         .direction = PI / 4.0,
     };
     map_destroy(&m);
@@ -166,8 +166,8 @@ static bool test_player_turn_right_and_move_forward(void) {
     player_move_forward(&p, &m, 1);
 
     Player expected = {
-        .x = 10 + sqrt(2) / 2.0,
-        .y = 10 + sqrt(2) / 2.0,
+        .x = 10.5 + sqrt(2) / 2.0,
+        .y = 10.5 + sqrt(2) / 2.0,
         .direction = 7.0 * PI / 4.0,
     };
     map_destroy(&m);
@@ -196,7 +196,7 @@ static bool test_player_collide_with_wall_east(void) {
 
     Player expected = {
         .x = 21,
-        .y = 10,
+        .y = 10.5,
         .direction = 0,
     };
     map_destroy(&m);
@@ -210,7 +210,7 @@ static bool test_player_collide_with_wall_north(void) {
     player_move_forward(&p, &m, 20);
 
     Player expected = {
-        .x = 10,
+        .x = 10.5,
         .y = 1,
         .direction = PI / 2,
     };
@@ -226,7 +226,7 @@ static bool test_player_collide_with_wall_west(void) {
 
     Player expected = {
         .x = 1,
-        .y = 10,
+        .y = 10.5,
         .direction = PI,
     };
     map_destroy(&m);
@@ -240,7 +240,7 @@ static bool test_player_collide_with_wall_south(void) {
     player_move_forward(&p, &m, 20);
 
     Player expected = {
-        .x = 10,
+        .x = 10.5,
         .y = 21,
         .direction = 1.5 * PI,
     };
@@ -277,42 +277,42 @@ static bool test_map_init_with_multiple_players(void) {
 
 static bool test_ray_cast_distance_with_int_distance(void) {
     Map m = make_test_map();
-    bool res = assert_eq(ray_cast_distance(&m, 2, 2, 0), 19.0);
+    bool res = assert_eq(cast_ray(&m, 2, 2, 0).distance, 19.0);
     map_destroy(&m);
     return res;
 }
 
 static bool test_ray_cast_distance_with_non_int_distance(void) {
     Map m = make_test_map();
-    bool res = assert_eq(ray_cast_distance(&m, 2.1, 2, 0), 18.9);
+    bool res = assert_eq(cast_ray(&m, 2.1, 2, 0).distance, 18.9);
     map_destroy(&m);
     return res;
 }
 
 static bool test_ray_cast_distance_towards_left(void) {
     Map m = make_test_map();
-    bool res = assert_eq(ray_cast_distance(&m, 2, 2, PI), 1);
+    bool res = assert_eq(cast_ray(&m, 2, 2, PI).distance, 1);
     map_destroy(&m);
     return res;
 }
 
 static bool test_ray_cast_distance_towards_bottom(void) {
     Map m = make_test_map();
-    bool res = assert_eq(ray_cast_distance(&m, 2, 2, 1.5 * PI), 19.0);
+    bool res = assert_eq(cast_ray(&m, 2, 2, 1.5 * PI).distance, 19.0);
     map_destroy(&m);
     return res;
 }
 
 static bool test_ray_cast_distance_at_angle(void) {
     Map m = make_test_map();
-    bool res = assert_eq(ray_cast_distance(&m, 2, 2, PI / 4), sqrt(2));
+    bool res = assert_eq(cast_ray(&m, 2, 2, PI / 4).distance, sqrt(2));
     map_destroy(&m);
     return res;
 }
 
 static bool test_ray_cast_distance_at_large_angle(void) {
     Map m = make_test_map();
-    bool res = assert_eq(ray_cast_distance(&m, 2, 2, 4.66), sqrt(1 + pow(19, 2)));
+    bool res = assert_eq(cast_ray(&m, 2, 2, 4.66).distance, sqrt(1 + pow(19, 2)));
     map_destroy(&m);
     return res;
 }
