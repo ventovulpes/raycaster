@@ -37,8 +37,8 @@ found_player:
 void player_move_forward(Player *player, Map *map, double distance) {
     double distance_before_obstacle =
         cast_ray(map, player->x, player->y, player->direction).distance;
-    if (distance > distance_before_obstacle + MIN_WALL_DISTANCE) {
-        distance = distance_before_obstacle;
+    if (distance > distance_before_obstacle - MIN_WALL_DISTANCE) {
+        distance = distance_before_obstacle - MIN_WALL_DISTANCE;
     }
 
     double d_x = cos(player->direction) * distance;
