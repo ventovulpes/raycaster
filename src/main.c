@@ -59,37 +59,44 @@ void put_vertical_slice(int x, double distance, int color) {
     }
 }
 
-void handle_input(bool *running) {
+bool handle_input() {
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
         if (event.type == SDL_EVENT_QUIT) {
-            running = false;
+            return false;
         } else if (event.type == SDL_EVENT_KEY_DOWN) {
             switch (event.key.key) {
             case SDLK_UP:
+            case SDLK_W:
                 keys_down |= KEY_UP;
                 break;
             case SDLK_LEFT:
+            case SDLK_A:
                 keys_down |= KEY_LEFT;
                 break;
             case SDLK_RIGHT:
+            case SDLK_D:
                 keys_down |= KEY_RIGHT;
                 break;
             }
         } else if (event.type == SDL_EVENT_KEY_UP) {
             switch (event.key.key) {
             case SDLK_UP:
+            case SDLK_W:
                 keys_down ^= KEY_UP;
                 break;
             case SDLK_LEFT:
+            case SDLK_A:
                 keys_down ^= KEY_LEFT;
                 break;
             case SDLK_RIGHT:
+            case SDLK_D:
                 keys_down ^= KEY_RIGHT;
                 break;
             }
         }
     }
+    return true;
 }
 
 void update_position(Player *player, Map *map) {
@@ -151,7 +158,7 @@ int main(void) {
     while (running) {
         int start = SDL_GetPerformanceCounter();
 
-        handle_input(&running);
+        running = handle_input();
         update_position(&player, &map);
         fill_pixel_buffer(&map, &player);
 
