@@ -144,6 +144,21 @@ static bool test_player_move_forward(void) {
     return assert_player_eq(&p, &expected);
 }
 
+static bool test_player_move_backward(void) {
+    Player p = make_test_player();
+    Map m = make_test_map();
+    player_turn_left(&p, 180);
+    player_move_backward(&p, &m, 10);
+
+    Player expected = {
+        .x = 11,
+        .y = 1,
+        .direction = PI,
+    };
+    map_destroy(&m);
+    return assert_player_eq(&p, &expected);
+}
+
 static bool test_player_turn_left_and_move_forward(void) {
     Map m = make_test_map();
     Player p = player_create(&m);
@@ -152,8 +167,8 @@ static bool test_player_turn_left_and_move_forward(void) {
 
     Player expected = {
         .x = 10.5 + sqrt(2) / 2.0,
-        .y = 10.5 - sqrt(2) / 2.0,
-        .direction = PI / 4.0,
+        .y = 10.5 + sqrt(2) / 2.0,
+        .direction = 7.0 * PI / 4.0,
     };
     map_destroy(&m);
     return assert_player_eq(&p, &expected);
@@ -167,8 +182,8 @@ static bool test_player_turn_right_and_move_forward(void) {
 
     Player expected = {
         .x = 10.5 + sqrt(2) / 2.0,
-        .y = 10.5 + sqrt(2) / 2.0,
-        .direction = 7.0 * PI / 4.0,
+        .y = 10.5 - sqrt(2) / 2.0,
+        .direction = PI / 4.0,
     };
     map_destroy(&m);
     return assert_player_eq(&p, &expected);
@@ -181,7 +196,7 @@ static bool test_player_turn_around_and_move_forward(void) {
     player_move_forward(&p, &m, 1);
 
     Player expected = {
-        .x = 1,
+        .x = 1 + MIN_WALL_DISTANCE,
         .y = 1,
         .direction = PI,
     };
@@ -195,7 +210,7 @@ static bool test_player_collide_with_wall_east(void) {
     player_move_forward(&p, &m, 20);
 
     Player expected = {
-        .x = 21,
+        .x = 21 - MIN_WALL_DISTANCE,
         .y = 10.5,
         .direction = 0,
     };
@@ -206,13 +221,13 @@ static bool test_player_collide_with_wall_east(void) {
 static bool test_player_collide_with_wall_north(void) {
     Map m = make_test_map();
     Player p = player_create(&m);
-    player_turn_left(&p, 90);
+    player_turn_right(&p, 90);
     player_move_forward(&p, &m, 20);
 
     Player expected = {
         .x = 10.5,
-        .y = 1,
-        .direction = PI / 2,
+        .y = 1 + MIN_WALL_DISTANCE,
+        .direction = PI / 2.0,
     };
     map_destroy(&m);
     return assert_player_eq(&p, &expected);
@@ -221,11 +236,11 @@ static bool test_player_collide_with_wall_north(void) {
 static bool test_player_collide_with_wall_west(void) {
     Map m = make_test_map();
     Player p = player_create(&m);
-    player_turn_left(&p, 180);
+    player_turn_right(&p, 180);
     player_move_forward(&p, &m, 20);
 
     Player expected = {
-        .x = 1,
+        .x = 1 + MIN_WALL_DISTANCE,
         .y = 10.5,
         .direction = PI,
     };
@@ -236,13 +251,13 @@ static bool test_player_collide_with_wall_west(void) {
 static bool test_player_collide_with_wall_south(void) {
     Map m = make_test_map();
     Player p = player_create(&m);
-    player_turn_right(&p, 90);
+    player_turn_left(&p, 90);
     player_move_forward(&p, &m, 20);
 
     Player expected = {
         .x = 10.5,
-        .y = 21,
-        .direction = 1.5 * PI,
+        .y = 21 - MIN_WALL_DISTANCE,
+        .direction = 3.0 * PI / 2.0,
     };
     map_destroy(&m);
     return assert_player_eq(&p, &expected);
@@ -323,6 +338,7 @@ int main(void) {
 
     Test tests[] = {
         TEST(test_player_move_forward),
+        TEST(test_player_move_backward),
         TEST(test_player_turn_left_and_move_forward),
         TEST(test_player_turn_right_and_move_forward),
         TEST(test_player_turn_around_and_move_forward),

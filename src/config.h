@@ -17,5 +17,6 @@
 
 #define MOVE_SPEED (1.5 / TARGET_FPS)
 #define TURN_SPEED (45.0 / TARGET_FPS)
+#define MOUSE_SENSITIVITY 0.15
 
 #endif

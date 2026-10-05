@@ -14,7 +14,14 @@ typedef enum {
     DARK_GREEN = 0xFF199E19,
 } Color;
 
-typedef enum { KEY_UP = 001, KEY_LEFT = 010, KEY_RIGHT = 100 } Key;
+// clang-format off
+typedef enum {
+    KEY_UP     = 0b0001,
+    KEY_DOWN   = 0b0010,
+    KEY_LEFT   = 0b0100,
+    KEY_RIGHT  = 0b1000
+} Key;
+// clang-format on
 
 #define CEILING_COLOR WHITE
 #define FLOOR_COLOR BLACK
@@ -23,6 +30,7 @@ static int frame_buffer[WIDTH * HEIGHT];
 static Hit hits[WIDTH];
 // bitmap which stores which keys are being pressed
 static int keys_down = 0;
+static double mouse_movement = 0;
 
 void put_pixel(int x, int y, int color) {
     if (x < 0 || x >= WIDTH || y < 0 || y >= HEIGHT) {
@@ -61,14 +69,22 @@ void put_vertical_slice(int x, double distance, int color) {
 
 bool handle_input() {
     SDL_Event event;
+
     while (SDL_PollEvent(&event)) {
         if (event.type == SDL_EVENT_QUIT) {
             return false;
         } else if (event.type == SDL_EVENT_KEY_DOWN) {
             switch (event.key.key) {
+            case SDLK_ESCAPE:
+            case SDLK_Q:
+                return false;
             case SDLK_UP:
             case SDLK_W:
                 keys_down |= KEY_UP;
+                break;
+            case SDLK_DOWN:
+            case SDLK_S:
+                keys_down |= KEY_DOWN;
                 break;
             case SDLK_LEFT:
             case SDLK_A:
@@ -85,6 +101,10 @@ bool handle_input() {
             case SDLK_W:
                 keys_down ^= KEY_UP;
                 break;
+            case SDLK_DOWN:
+            case SDLK_S:
+                keys_down ^= KEY_DOWN;
+                break;
             case SDLK_LEFT:
             case SDLK_A:
                 keys_down ^= KEY_LEFT;
@@ -94,6 +114,8 @@ bool handle_input() {
                 keys_down ^= KEY_RIGHT;
                 break;
             }
+        } else if (event.type == SDL_EVENT_MOUSE_MOTION) {
+            mouse_movement = event.motion.xrel;
         }
     }
     return true;
@@ -103,11 +125,21 @@ void update_position(Player *player, Map *map) {
     if (keys_down & KEY_UP) {
         player_move_forward(player, map, MOVE_SPEED);
     }
+    if (keys_down & KEY_DOWN) {
+        player_move_backward(player, map, MOVE_SPEED);
+    }
     if (keys_down & KEY_LEFT) {
         player_turn_left(player, TURN_SPEED);
     }
     if (keys_down & KEY_RIGHT) {
         player_turn_right(player, TURN_SPEED);
+    }
+    if (mouse_movement < 0) {
+        player_turn_left(player, -mouse_movement * MOUSE_SENSITIVITY);
+        mouse_movement = 0;
+    } else if (mouse_movement > 0) {
+        player_turn_right(player, mouse_movement * MOUSE_SENSITIVITY);
+        mouse_movement = 0;
     }
 }
 
@@ -150,6 +182,8 @@ int main(void) {
         return -1;
     }
 
+    SDL_SetWindowRelativeMouseMode(window, true);
+
     bool running = true;
     Map map = {0};
     map_load(&map, "tests/maps/map3.txt");
@@ -178,6 +212,7 @@ int main(void) {
         }
     }
 
+    SDL_SetWindowRelativeMouseMode(window, false);
     SDL_DestroyTexture(texture);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
