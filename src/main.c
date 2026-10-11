@@ -26,26 +26,20 @@ typedef enum {
 #define CEILING_COLOR WHITE
 #define FLOOR_COLOR BLACK
 
-static int frame_buffer[WIDTH * HEIGHT];
-static Hit hits[WIDTH];
-// bitmap which stores which keys are being pressed
-static int keys_down = 0;
-static double mouse_movement = 0;
-
-void put_pixel(int x, int y, int color) {
+void put_pixel(int frame_buffer[], int x, int y, int color) {
     if (x < 0 || x >= WIDTH || y < 0 || y >= HEIGHT) {
         return;
     }
     frame_buffer[y * WIDTH + x] = color;
 }
 
-void clear(int color) {
+void clear(int frame_buffer[], int color) {
     for (int i = 0; i < WIDTH * HEIGHT; i++) {
         frame_buffer[i] = color;
     }
 }
 
-void put_vertical_slice(int x, double distance, int color) {
+void put_vertical_slice(int frame_buffer[], int x, double distance, int color) {
     int height;
     if (distance == 0) {
         height = HEIGHT;
@@ -63,11 +57,11 @@ void put_vertical_slice(int x, double distance, int color) {
         } else {
             pixel_color = color;
         }
-        put_pixel(x, i, pixel_color);
+        put_pixel(frame_buffer, x, i, pixel_color);
     }
 }
 
-bool handle_input() {
+bool handle_input(int *keys_down, double *mouse_movement) {
     SDL_Event event;
 
     while (SDL_PollEvent(&event)) {
@@ -80,48 +74,49 @@ bool handle_input() {
                 return false;
             case SDLK_UP:
             case SDLK_W:
-                keys_down |= KEY_UP;
+                *keys_down |= KEY_UP;
                 break;
             case SDLK_DOWN:
             case SDLK_S:
-                keys_down |= KEY_DOWN;
+                *keys_down |= KEY_DOWN;
                 break;
             case SDLK_LEFT:
             case SDLK_A:
-                keys_down |= KEY_LEFT;
+                *keys_down |= KEY_LEFT;
                 break;
             case SDLK_RIGHT:
             case SDLK_D:
-                keys_down |= KEY_RIGHT;
+                *keys_down |= KEY_RIGHT;
                 break;
             }
         } else if (event.type == SDL_EVENT_KEY_UP) {
             switch (event.key.key) {
             case SDLK_UP:
             case SDLK_W:
-                keys_down ^= KEY_UP;
+                *keys_down ^= KEY_UP;
                 break;
             case SDLK_DOWN:
             case SDLK_S:
-                keys_down ^= KEY_DOWN;
+                *keys_down ^= KEY_DOWN;
                 break;
             case SDLK_LEFT:
             case SDLK_A:
-                keys_down ^= KEY_LEFT;
+                *keys_down ^= KEY_LEFT;
                 break;
             case SDLK_RIGHT:
             case SDLK_D:
-                keys_down ^= KEY_RIGHT;
+                *keys_down ^= KEY_RIGHT;
                 break;
             }
         } else if (event.type == SDL_EVENT_MOUSE_MOTION) {
-            mouse_movement = event.motion.xrel;
+            *mouse_movement = event.motion.xrel;
         }
     }
     return true;
 }
 
-void update_position(Player *player, Map *map) {
+void update_position(Player *player, Map *map, int keys_down,
+                     double mouse_movement) {
     if (keys_down & KEY_UP) {
         player_move_forward(player, map, MOVE_SPEED);
     }
@@ -143,15 +138,17 @@ void update_position(Player *player, Map *map) {
     }
 }
 
-void fill_pixel_buffer(Map *map, Player *player) {
+void fill_pixel_buffer(int frame_buffer[], Hit hits[], Map *map,
+                       Player *player) {
     compute_hits(hits, map, player);
 
-    clear(WHITE);
+    clear(frame_buffer, WHITE);
     for (int i = 0; i < WIDTH; i++) {
         Hit hit = hits[i];
         int color = hit.side == DIRECITON_X ? DARK_GREEN : GREEN;
         put_vertical_slice(
-            i, hit.distance * cos(hit.direction - player->direction), color);
+            frame_buffer, i,
+            hit.distance * cos(hit.direction - player->direction), color);
     }
 }
 
@@ -185,6 +182,12 @@ int main(void) {
 
     SDL_SetWindowRelativeMouseMode(window, true);
 
+    int frame_buffer[WIDTH * HEIGHT];
+    Hit hits[WIDTH];
+    // bitmap which stores which keys are being pressed
+    int keys_down = 0;
+    double mouse_movement = 0;
+
     bool running = true;
     Map map = {0};
     map_load(&map, "tests/maps/map3.txt");
@@ -193,9 +196,10 @@ int main(void) {
     while (running) {
         int start = SDL_GetPerformanceCounter();
 
-        running = handle_input();
-        update_position(&player, &map);
-        fill_pixel_buffer(&map, &player);
+        running = handle_input(&keys_down, &mouse_movement);
+        update_position(&player, &map, keys_down, mouse_movement);
+        mouse_movement = 0;
+        fill_pixel_buffer(frame_buffer, hits, &map, &player);
 
         // update screen
         SDL_UpdateTexture(texture, NULL, frame_buffer, WIDTH * sizeof(int));
