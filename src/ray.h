@@ -12,6 +12,7 @@ typedef enum Direction {
 
 typedef struct Hit {
     double distance;
+    double direction;
     Direction side;
     CellType object_type;
 } Hit;

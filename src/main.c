@@ -150,7 +150,8 @@ void fill_pixel_buffer(Map *map, Player *player) {
     for (int i = 0; i < WIDTH; i++) {
         Hit hit = hits[i];
         int color = hit.side == DIRECITON_X ? DARK_GREEN : GREEN;
-        put_vertical_slice(i, hit.distance, color);
+        put_vertical_slice(
+            i, hit.distance * cos(hit.direction - player->direction), color);
     }
 }
 

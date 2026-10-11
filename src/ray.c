@@ -7,8 +7,8 @@
 
 static bool approx_eq(double a, double b) { return fabs(a - b) < EPSILON; }
 
-// Returns the distance to the nearest non empty cell by casting a ray starting
-// at `(x, y)` with `direction` (in radians).
+// Returns the `Hit` from casting a ray starting at `(x, y)` with `direction`
+// (in radians).
 Hit cast_ray(Map *map, double x, double y, double direction) {
     // calculates distance to nearest obstable using the DDA algorithm
 
@@ -64,6 +64,7 @@ Hit cast_ray(Map *map, double x, double y, double direction) {
 
     return (Hit){
         cur_dist,
+        direction,
         side,
         WALL,
     };
@@ -74,8 +75,13 @@ void compute_hits(Hit hits[], Map *map, Player *player) {
     double angle = player->direction - (FOV_RAD / 2);
     double angle_step = FOV_RAD / (double)WIDTH;
 
-    for (size_t i = 0; i < WIDTH; i++) {
+    // for (size_t i = 0; i < WIDTH; i++) {
+    //     hits[i] = cast_ray(map, player->x, player->y, angle);
+    //     angle += angle_step;
+    // }
+    for (int i = 0; i < WIDTH; i++) {
+        double screen_x = i - WIDTH / 2;
+        double angle = atan2(screen_x, FOV_DIST) + player->direction;
         hits[i] = cast_ray(map, player->x, player->y, angle);
-        angle += angle_step;
     }
 }

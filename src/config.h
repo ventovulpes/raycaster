@@ -9,6 +9,7 @@
 
 #define FOV 70
 #define FOV_RAD (FOV * PI / 180.0)
+#define FOV_DIST (0.5 * WIDTH / tan(0.5 * FOV_RAD))
 
 #define TARGET_FPS 60.0
 #define TARGET_FRAME_LEN 1.0 / TARGET_FPS
