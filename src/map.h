@@ -6,7 +6,9 @@
 
 typedef enum {
     EMPTY,
-    WALL,
+    RED_WALL,
+    GREEN_WALL,
+    BLUE_WALL,
     PLAYER,
 } CellType;
 

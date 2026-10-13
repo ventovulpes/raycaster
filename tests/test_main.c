@@ -26,7 +26,7 @@ static void print_cells(CellType *cells, size_t height, size_t width) {
             case EMPTY:
                 ch = '.';
                 break;
-            case WALL:
+            case GREEN_WALL:
                 ch = 'X';
                 break;
             case PLAYER:
@@ -267,12 +267,12 @@ static bool test_map_load(void) {
     Map m = {0};
     // clang-format off
     CellType expected[6 * 12] = {
-        WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL, 
-        WALL, EMPTY, EMPTY, WALL, WALL, WALL, EMPTY, EMPTY, EMPTY, EMPTY, WALL, WALL, 
-        WALL, WALL, EMPTY, EMPTY, EMPTY, EMPTY, WALL, WALL, EMPTY, EMPTY, WALL, WALL, 
-        WALL, PLAYER, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, WALL, 
-        WALL, WALL, WALL, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, WALL, WALL,
-        WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL, 
+        GREEN_WALL, GREEN_WALL, GREEN_WALL, GREEN_WALL, GREEN_WALL, GREEN_WALL, GREEN_WALL, GREEN_WALL, GREEN_WALL, GREEN_WALL, GREEN_WALL, GREEN_WALL, 
+        GREEN_WALL, EMPTY, EMPTY, GREEN_WALL, GREEN_WALL, GREEN_WALL, EMPTY, EMPTY, EMPTY, EMPTY, GREEN_WALL, GREEN_WALL, 
+        GREEN_WALL, GREEN_WALL, EMPTY, EMPTY, EMPTY, EMPTY, GREEN_WALL, GREEN_WALL, EMPTY, EMPTY, GREEN_WALL, GREEN_WALL, 
+        GREEN_WALL, PLAYER, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, GREEN_WALL, 
+        GREEN_WALL, GREEN_WALL, GREEN_WALL, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, GREEN_WALL, GREEN_WALL,
+        GREEN_WALL, GREEN_WALL, GREEN_WALL, GREEN_WALL, GREEN_WALL, GREEN_WALL, GREEN_WALL, GREEN_WALL, GREEN_WALL, GREEN_WALL, GREEN_WALL, GREEN_WALL, 
     };
     // clang-format off
     bool res = map_load(&m, "tests/maps/map1.txt") && assert_cell_array_eq(m.cells, expected, 6, 12);

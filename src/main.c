@@ -10,8 +10,12 @@
 typedef enum {
     WHITE = 0xFFFFFFFF,
     BLACK = 0x00000000,
+    RED = 0xFFFF0000,
+    DARK_RED = 0xFFA80000,
     GREEN = 0xFF00FF00,
     DARK_GREEN = 0xFF199E19,
+    BLUE = 0xFF00F7FF,
+    DARK_BLUE = 0xFF009EA3,
 } Color;
 
 // clang-format off
@@ -145,7 +149,20 @@ void fill_pixel_buffer(int frame_buffer[], Hit hits[], Map *map,
     clear(frame_buffer, WHITE);
     for (int i = 0; i < WIDTH; i++) {
         Hit hit = hits[i];
-        int color = hit.side == DIRECITON_X ? DARK_GREEN : GREEN;
+        int color;
+        switch (hit.object_type) {
+        case RED_WALL:
+            color = hit.side == DIRECITON_X ? DARK_RED : RED;
+            break;
+        case GREEN_WALL:
+            color = hit.side == DIRECITON_X ? DARK_GREEN : GREEN;
+            break;
+        case BLUE_WALL:
+            color = hit.side == DIRECITON_X ? DARK_BLUE : BLUE;
+            break;
+        default:
+            color = WHITE;
+        }
         put_vertical_slice(
             frame_buffer, i,
             hit.distance * cos(hit.direction - player->direction), color);
@@ -155,7 +172,7 @@ void fill_pixel_buffer(int frame_buffer[], Hit hits[], Map *map,
 int main(int argc, char **argv) {
     const char *file_name;
     if (argc == 1) {
-        file_name = "tests/maps/map1.txt";
+        file_name = "maps/default.txt";
     } else {
         file_name = argv[1];
     }

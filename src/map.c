@@ -6,7 +6,7 @@
 #include <string.h>
 
 #define BUFFER_SIZE 256
-#define VALID_CHARS "X.P"
+#define VALID_CHARS "XRGB.P"
 
 // Creates a Map with dimensions `height` and `width`.
 static Map map_create(size_t height, size_t width) {
@@ -72,7 +72,7 @@ static bool map_data_init(CellType *cells, const char *file_name, size_t height,
     }
 
     for (size_t i = 0; i < width; i++) {
-        cells[i] = WALL;
+        cells[i] = GREEN_WALL;
     }
 
     bool found_player = false;
@@ -84,7 +84,7 @@ static bool map_data_init(CellType *cells, const char *file_name, size_t height,
         for (size_t j = 0; j < width; j++) {
             // add surrounding walls
             if (j == 0 || j == width - 1) {
-                cells[width * i + j] = WALL;
+                cells[width * i + j] = GREEN_WALL;
                 continue;
             }
 
@@ -93,8 +93,15 @@ static bool map_data_init(CellType *cells, const char *file_name, size_t height,
             case '.':
                 cell = EMPTY;
                 break;
+            case 'R':
+                cell = RED_WALL;
+                break;
             case 'X':
-                cell = WALL;
+            case 'G':
+                cell = GREEN_WALL;
+                break;
+            case 'B':
+                cell = BLUE_WALL;
                 break;
             case 'P':
                 if (found_player) {
@@ -114,7 +121,7 @@ static bool map_data_init(CellType *cells, const char *file_name, size_t height,
     }
 
     for (size_t i = 0; i < width; i++) {
-        cells[width * (height - 1) + i] = WALL;
+        cells[width * (height - 1) + i] = GREEN_WALL;
     }
 
     fclose(f);

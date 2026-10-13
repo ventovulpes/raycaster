@@ -61,12 +61,13 @@ Hit cast_ray(const Map *map, double x, double y, double direction) {
             side = DIRECTION_Y;
         }
     }
+    CellType object_type = map_get(map, cell_x, cell_y);
 
     return (Hit){
         cur_dist,
         direction,
         side,
-        WALL,
+        object_type,
     };
 }
 
