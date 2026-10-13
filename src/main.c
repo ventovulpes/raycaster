@@ -163,20 +163,17 @@ int main(int argc, char **argv) {
     if (!SDL_Init(SDL_INIT_VIDEO)) {
         return -1;
     }
-
     SDL_Window *window = SDL_CreateWindow("Raycaster", WIDTH, HEIGHT, 0);
     if (!window) {
         SDL_Quit();
         return -1;
     }
-
     SDL_Renderer *renderer = SDL_CreateRenderer(window, NULL);
     if (!renderer) {
         SDL_DestroyWindow(window);
         SDL_Quit();
         return -1;
     }
-
     SDL_Texture *texture =
         SDL_CreateTexture(renderer, SDL_PIXELFORMAT_XRGB8888,
                           SDL_TEXTUREACCESS_STREAMING, WIDTH, HEIGHT);
@@ -186,7 +183,6 @@ int main(int argc, char **argv) {
         SDL_Quit();
         return -1;
     }
-
     SDL_SetWindowRelativeMouseMode(window, true);
 
     int frame_buffer[WIDTH * HEIGHT];

@@ -9,7 +9,7 @@ static bool approx_eq(double a, double b) { return fabs(a - b) < EPSILON; }
 
 // Returns the `Hit` from casting a ray starting at `(x, y)` with `direction`
 // (in radians).
-Hit cast_ray(Map *map, double x, double y, double direction) {
+Hit cast_ray(const Map *map, double x, double y, double direction) {
     // calculates distance to nearest obstable using the DDA algorithm
 
     double d_x = cos(direction);
@@ -71,10 +71,10 @@ Hit cast_ray(Map *map, double x, double y, double direction) {
 }
 
 // Sends `WIDTH` number of rays inside `FOV`, populating `hits` with hit data.
-void compute_hits(Hit hits[], Map *map, Player *player) {
+void compute_hits(Hit hits_out[], const Map *map, const Player *player) {
     for (int i = 0; i < WIDTH; i++) {
         double screen_x = i - WIDTH / 2;
         double angle = atan2(screen_x, FOV_DIST) + player->direction;
-        hits[i] = cast_ray(map, player->x, player->y, angle);
+        hits_out[i] = cast_ray(map, player->x, player->y, angle);
     }
 }

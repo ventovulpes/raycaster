@@ -20,6 +20,6 @@ bool map_load(Map *map, const char *file_name);
 
 void map_destroy(Map *map);
 
-CellType map_get(Map *map, size_t x, size_t y);
+CellType map_get(const Map *map, size_t x, size_t y);
 
 #endif

@@ -36,7 +36,7 @@ found_player:
 
 static double mod(double x, double m) { return fmod(fmod(x, m) + m, m); }
 
-void player_move_forward(Player *player, Map *map, double distance) {
+void player_move_forward(Player *player, const Map *map, double distance) {
     double distance_before_obstacle =
         cast_ray(map, player->x, player->y, player->direction).distance;
     if (distance > distance_before_obstacle - MIN_WALL_DISTANCE) {
@@ -50,7 +50,7 @@ void player_move_forward(Player *player, Map *map, double distance) {
     player->y += d_y;
 }
 
-void player_move_backward(Player *player, Map *map, double distance) {
+void player_move_backward(Player *player, const Map *map, double distance) {
     double distance_before_obstacle =
         cast_ray(map, player->x, player->y, mod(player->direction + PI, 2 * PI))
             .distance;

@@ -21,7 +21,7 @@ static Map map_create(size_t height, size_t width) {
 
 // Calculates the dimensions needed for map in `file_name`. Updates `height` and
 // `width` in place.
-static bool map_calc_dimensions(char *file_name, size_t *height,
+static bool map_calc_dimensions(const char *file_name, size_t *height,
                                 size_t *width) {
     FILE *f = fopen(file_name, "r");
     if (f == NULL) {
@@ -63,7 +63,7 @@ static bool map_calc_dimensions(char *file_name, size_t *height,
 }
 
 // Initializes `map`'s cells based on the given file.
-static bool map_data_init(CellType *cells, char *file_name, size_t height,
+static bool map_data_init(CellType *cells, const char *file_name, size_t height,
                           size_t width) {
     FILE *f = fopen(file_name, "r");
     if (f == NULL) {
@@ -145,6 +145,6 @@ void map_destroy(Map *map) {
     map->cells = NULL;
 }
 
-CellType map_get(Map *map, size_t x, size_t y) {
+CellType map_get(const Map *map, size_t x, size_t y) {
     return map->cells[map->width * y + x];
 }

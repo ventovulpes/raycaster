@@ -17,8 +17,8 @@ typedef struct Hit {
     CellType object_type;
 } Hit;
 
-Hit cast_ray(Map *map, double x, double y, double direction);
+Hit cast_ray(const Map *map, double x, double y, double direction);
 
-void compute_hits(Hit hits[], Map *map, Player *player);
+void compute_hits(Hit hits_out[], const Map *map, const Player *player);
 
 #endif
