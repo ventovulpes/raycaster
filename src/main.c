@@ -152,7 +152,14 @@ void fill_pixel_buffer(int frame_buffer[], Hit hits[], Map *map,
     }
 }
 
-int main(void) {
+int main(int argc, char **argv) {
+    const char *file_name;
+    if (argc == 1) {
+        file_name = "tests/maps/map1.txt";
+    } else {
+        file_name = argv[1];
+    }
+
     if (!SDL_Init(SDL_INIT_VIDEO)) {
         return -1;
     }
@@ -190,7 +197,7 @@ int main(void) {
 
     bool running = true;
     Map map = {0};
-    map_load(&map, "tests/maps/map3.txt");
+    map_load(&map, file_name);
     Player player = player_create(&map);
 
     while (running) {

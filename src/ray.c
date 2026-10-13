@@ -72,13 +72,6 @@ Hit cast_ray(Map *map, double x, double y, double direction) {
 
 // Sends `WIDTH` number of rays inside `FOV`, populating `hits` with hit data.
 void compute_hits(Hit hits[], Map *map, Player *player) {
-    double angle = player->direction - (FOV_RAD / 2);
-    double angle_step = FOV_RAD / (double)WIDTH;
-
-    // for (size_t i = 0; i < WIDTH; i++) {
-    //     hits[i] = cast_ray(map, player->x, player->y, angle);
-    //     angle += angle_step;
-    // }
     for (int i = 0; i < WIDTH; i++) {
         double screen_x = i - WIDTH / 2;
         double angle = atan2(screen_x, FOV_DIST) + player->direction;

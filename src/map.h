@@ -16,7 +16,7 @@ typedef struct Map {
     CellType *cells;
 } Map;
 
-bool map_load(Map *map, char *file_name);
+bool map_load(Map *map, const char *file_name);
 
 void map_destroy(Map *map);
 

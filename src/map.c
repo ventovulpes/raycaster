@@ -127,7 +127,7 @@ static bool map_data_init(CellType *cells, char *file_name, size_t height,
 }
 
 // Creates and initializes `map` with data in the given file.
-bool map_load(Map *map, char *file_name) {
+bool map_load(Map *map, const char *file_name) {
     size_t height, width;
     if (!map_calc_dimensions(file_name, &height, &width)) {
         return false;

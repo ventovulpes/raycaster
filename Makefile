@@ -8,7 +8,7 @@ build:
 	cmake --build build
 
 run: build
-	./$(TARGET)
+	./$(TARGET) $(FILE)
 
 test: $(TEST)
 	mkdir -p build
