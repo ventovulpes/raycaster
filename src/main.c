@@ -120,24 +120,26 @@ bool handle_input(int *keys_down, double *mouse_movement) {
 }
 
 void update_position(Player *player, Map *map, int keys_down,
-                     double mouse_movement) {
+                     double mouse_movement, double delta_time) {
     if (keys_down & KEY_UP) {
-        player_move_forward(player, map, MOVE_SPEED);
+        player_move_forward(player, map, MOVE_SPEED * delta_time);
     }
     if (keys_down & KEY_DOWN) {
-        player_move_backward(player, map, MOVE_SPEED);
+        player_move_backward(player, map, MOVE_SPEED * delta_time);
     }
     if (keys_down & KEY_LEFT) {
-        player_turn_left(player, TURN_SPEED);
+        player_turn_left(player, TURN_SPEED * delta_time);
     }
     if (keys_down & KEY_RIGHT) {
-        player_turn_right(player, TURN_SPEED);
+        player_turn_right(player, TURN_SPEED * delta_time);
     }
     if (mouse_movement < 0) {
-        player_turn_left(player, -mouse_movement * MOUSE_SENSITIVITY);
+        player_turn_left(player,
+                         -mouse_movement * MOUSE_SENSITIVITY * delta_time);
         mouse_movement = 0;
     } else if (mouse_movement > 0) {
-        player_turn_right(player, mouse_movement * MOUSE_SENSITIVITY);
+        player_turn_right(player,
+                          mouse_movement * MOUSE_SENSITIVITY * delta_time);
         mouse_movement = 0;
     }
 }
@@ -214,6 +216,12 @@ void fill_minimap(int frame_buffer[], const Map *map, const Player *player) {
     }
 }
 
+void render_fps(SDL_Renderer *renderer, double fps) {
+    char fps_str[7];
+    snprintf(fps_str, 7, "%.2f", fps);
+    SDL_RenderDebugText(renderer, 10.0f, HEIGHT - 20.0f, fps_str);
+}
+
 int main(int argc, char **argv) {
     const char *file_name;
     if (argc == 1) {
@@ -236,6 +244,7 @@ int main(int argc, char **argv) {
         SDL_Quit();
         return -1;
     }
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
     SDL_Texture *texture =
         SDL_CreateTexture(renderer, SDL_PIXELFORMAT_XRGB8888,
                           SDL_TEXTUREACCESS_STREAMING, WIDTH, HEIGHT);
@@ -245,6 +254,7 @@ int main(int argc, char **argv) {
         SDL_Quit();
         return -1;
     }
+
     SDL_SetWindowRelativeMouseMode(window, true);
 
     int frame_buffer[WIDTH * HEIGHT];
@@ -253,17 +263,27 @@ int main(int argc, char **argv) {
     int keys_down = 0;
     double mouse_movement = 0;
 
+    int prev = 0;
+    int now = 0;
+    double elapsed_time = 0.0f;
+    int num_frames = 0;
+    double fps = 0.0f;
+
     bool running = true;
     Map map = {0};
     map_load(&map, file_name);
     Player player = player_create(&map);
 
     while (running) {
-        int start = SDL_GetPerformanceCounter();
+        // calculate time between frames to normalize movement
+        now = SDL_GetPerformanceCounter();
+        double delta_time =
+            (double)(now - prev) / (double)SDL_GetPerformanceFrequency();
+        prev = now;
 
         // input
         running = handle_input(&keys_down, &mouse_movement);
-        update_position(&player, &map, keys_down, mouse_movement);
+        update_position(&player, &map, keys_down, mouse_movement, delta_time);
         mouse_movement = 0;
 
         // fill buffer
@@ -274,15 +294,16 @@ int main(int argc, char **argv) {
         SDL_UpdateTexture(texture, NULL, frame_buffer, WIDTH * sizeof(int));
         SDL_RenderClear(renderer);
         SDL_RenderTexture(renderer, texture, NULL, NULL);
+        render_fps(renderer, fps);
         SDL_RenderPresent(renderer);
 
-        int end = SDL_GetPerformanceCounter();
-
-        // cap frame rate to keep speeds constant
-        double elapsed =
-            (double)(end - start) / (double)SDL_GetPerformanceFrequency();
-        if (elapsed < TARGET_FRAME_LEN) {
-            SDL_Delay((int)((TARGET_FRAME_LEN - elapsed) * 1000.0));
+        // calculate fps
+        elapsed_time += delta_time;
+        num_frames++;
+        if (elapsed_time >= 1.0f) {
+            fps = num_frames / elapsed_time;
+            elapsed_time = 0.0f;
+            num_frames = 0;
         }
     }
 
