@@ -169,6 +169,51 @@ void fill_pixel_buffer(int frame_buffer[], Hit hits[], Map *map,
     }
 }
 
+int color_of_cell(const Map *map, size_t x, size_t y) {
+    CellType object = map_get(map, x, y);
+    switch (object) {
+    case EMPTY:
+        return BLACK;
+    case RED_WALL:
+        return RED;
+    case GREEN_WALL:
+        return GREEN;
+    case BLUE_WALL:
+        return BLUE;
+    default:
+        return WHITE;
+    }
+}
+
+void fill_minimap(int frame_buffer[], const Map *map, const Player *player) {
+    int x_offset = WIDTH - MINIMAP_MARGIN;
+    int y_offset = MINIMAP_MARGIN;
+    int width = map->width * MINIMAP_SIZE_MULT;
+    int height = map->height * MINIMAP_SIZE_MULT;
+
+    // draw map
+    for (int i = 0; i < width; i++) {
+        for (int j = 0; j < height; j++) {
+            int x = (int)(i / MINIMAP_SIZE_MULT);
+            int y = (int)(j / MINIMAP_SIZE_MULT);
+            int color = color_of_cell(map, x, y);
+            put_pixel(frame_buffer, x_offset - i, y_offset + j, color);
+        }
+    }
+
+    // draw player
+    int x = player->x * MINIMAP_SIZE_MULT;
+    int y = player->y * MINIMAP_SIZE_MULT;
+    int player_size = 3;
+    for (int i = 0; i < player_size; i++) {
+        for (int j = 0; j < player_size; j++) {
+            if (i < 0 || j < 0 || i >= WIDTH || j >= HEIGHT)
+                continue;
+            put_pixel(frame_buffer, x_offset - x + i, y_offset + y + j, WHITE);
+        }
+    }
+}
+
 int main(int argc, char **argv) {
     const char *file_name;
     if (argc == 1) {
@@ -216,10 +261,14 @@ int main(int argc, char **argv) {
     while (running) {
         int start = SDL_GetPerformanceCounter();
 
+        // input
         running = handle_input(&keys_down, &mouse_movement);
         update_position(&player, &map, keys_down, mouse_movement);
         mouse_movement = 0;
+
+        // fill buffer
         fill_pixel_buffer(frame_buffer, hits, &map, &player);
+        fill_minimap(frame_buffer, &map, &player);
 
         // update screen
         SDL_UpdateTexture(texture, NULL, frame_buffer, WIDTH * sizeof(int));
@@ -229,7 +278,7 @@ int main(int argc, char **argv) {
 
         int end = SDL_GetPerformanceCounter();
 
-        // cap frame rate
+        // cap frame rate to keep speeds constant
         double elapsed =
             (double)(end - start) / (double)SDL_GetPerformanceFrequency();
         if (elapsed < TARGET_FRAME_LEN) {

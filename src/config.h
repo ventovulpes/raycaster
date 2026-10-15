@@ -7,6 +7,9 @@
 #define WIDTH 800
 #define HEIGHT 600
 
+#define MINIMAP_SIZE_MULT 10
+#define MINIMAP_MARGIN 10
+
 #define FOV 70
 #define FOV_RAD (FOV * PI / 180.0)
 #define FOV_DIST (0.5 * WIDTH / tan(0.5 * FOV_RAD))
@@ -18,6 +21,6 @@
 
 #define MOVE_SPEED (1.5 / TARGET_FPS)
 #define TURN_SPEED (45.0 / TARGET_FPS)
-#define MOUSE_SENSITIVITY 0.15
+#define MOUSE_SENSITIVITY (10 / TARGET_FPS)
 
 #endif
