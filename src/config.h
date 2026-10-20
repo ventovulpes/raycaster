@@ -7,8 +7,10 @@
 #define WIDTH 800
 #define HEIGHT 600
 
-#define MINIMAP_SIZE_MULT 10
+#define MINIMAP_ZOOM_MULT 20
 #define MINIMAP_MARGIN 10
+#define MINIMAP_SIZE 80
+#define PLAYER_SIZE 4
 
 #define FOV 70
 #define FOV_RAD (FOV * PI / 180.0)

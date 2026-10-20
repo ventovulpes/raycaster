@@ -187,36 +187,56 @@ int color_of_cell(const Map *map, size_t x, size_t y) {
     }
 }
 
+void rotate(int *x, int *y, double angle, double center_x, double center_y) {
+    double d_x = *x - center_x;
+    double d_y = *y - center_y;
+
+    double c = cos(angle);
+    double s = sin(angle);
+
+    *x = d_x * c - d_y * s + center_x;
+    *y = d_x * s + d_y * c + center_y;
+}
+
 void fill_minimap(int frame_buffer[], const Map *map, const Player *player) {
-    int x_offset = WIDTH - MINIMAP_MARGIN;
-    int y_offset = MINIMAP_MARGIN;
-    int width = map->width * MINIMAP_SIZE_MULT;
-    int height = map->height * MINIMAP_SIZE_MULT;
+    int x_offset = WIDTH - MINIMAP_MARGIN - MINIMAP_SIZE;
+    int y_offset = MINIMAP_MARGIN + MINIMAP_SIZE;
+    int width = map->width * MINIMAP_ZOOM_MULT;
+    int height = map->height * MINIMAP_ZOOM_MULT;
+
+    int player_x = player->x * MINIMAP_ZOOM_MULT;
+    int player_y = player->y * MINIMAP_ZOOM_MULT;
 
     // draw map
-    for (int i = 0; i < width; i++) {
-        for (int j = 0; j < height; j++) {
-            int x = (int)(i / MINIMAP_SIZE_MULT);
-            int y = (int)(j / MINIMAP_SIZE_MULT);
+    for (int i = -MINIMAP_SIZE; i < MINIMAP_SIZE; i++) {
+        for (int j = -MINIMAP_SIZE; j < MINIMAP_SIZE; j++) {
+            int x = i + player_x;
+            int y = j + player_y;
+            rotate(&x, &y, PI / 2 - player->direction, player_x, player_y);
+            if (x < 0 || y < 0) {
+                continue;
+            }
+
+            x = round(x / MINIMAP_ZOOM_MULT);
+            y = round(y / MINIMAP_ZOOM_MULT);
+
+            if (x < 0 || y < 0 || x >= map->width || y >= map->height) {
+                continue;
+            }
             int color = color_of_cell(map, x, y);
             put_pixel(frame_buffer, x_offset - i, y_offset + j, color);
         }
     }
 
     // draw player
-    int x = player->x * MINIMAP_SIZE_MULT;
-    int y = player->y * MINIMAP_SIZE_MULT;
-    int player_size = 3;
-    for (int i = 0; i < player_size; i++) {
-        for (int j = 0; j < player_size; j++) {
-            if (i < 0 || j < 0 || i >= WIDTH || j >= HEIGHT)
-                continue;
-            put_pixel(frame_buffer, x_offset - x + i, y_offset + y + j, WHITE);
+    for (int i = -PLAYER_SIZE; i < PLAYER_SIZE; i++) {
+        for (int j = -PLAYER_SIZE; j < PLAYER_SIZE; j++) {
+            put_pixel(frame_buffer, x_offset + i, y_offset + j, WHITE);
         }
     }
 }
 
-void render_fps(SDL_Renderer *renderer, double fps) {
+void render_fps_counter(SDL_Renderer *renderer, double fps) {
     char fps_str[7];
     snprintf(fps_str, 7, "%.2f", fps);
     SDL_RenderDebugText(renderer, 10.0f, HEIGHT - 20.0f, fps_str);
@@ -294,7 +314,7 @@ int main(int argc, char **argv) {
         SDL_UpdateTexture(texture, NULL, frame_buffer, WIDTH * sizeof(int));
         SDL_RenderClear(renderer);
         SDL_RenderTexture(renderer, texture, NULL, NULL);
-        render_fps(renderer, fps);
+        render_fps_counter(renderer, fps);
         SDL_RenderPresent(renderer);
 
         // calculate fps

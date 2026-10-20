@@ -1,4 +1,5 @@
 #include "map.h"
+#include <assert.h>
 #include <math.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -153,5 +154,6 @@ void map_destroy(Map *map) {
 }
 
 CellType map_get(const Map *map, size_t x, size_t y) {
+    assert(x >= 0 && y >= 0);
     return map->cells[map->width * y + x];
 }
