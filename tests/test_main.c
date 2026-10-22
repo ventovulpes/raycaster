@@ -26,8 +26,14 @@ static void print_cells(CellType *cells, size_t height, size_t width) {
             case EMPTY:
                 ch = '.';
                 break;
+            case RED_WALL:
+                ch = 'R';
+                break;
             case GREEN_WALL:
-                ch = 'X';
+                ch = 'G';
+                break;
+            case BLUE_WALL:
+                ch = 'B';
                 break;
             case PLAYER:
                 ch = 'P';

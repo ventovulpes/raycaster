@@ -46,8 +46,11 @@ static bool map_calc_dimensions(const char *file_name, size_t *height,
             ch++;
         }
 
-        // `width` is set to line with max width
-        if (i > *width) {
+        if (*width != 0 && i != *width) {
+            fprintf(stderr, "lines in map file must be of equal length\n");
+            fclose(f);
+            return false;
+        } else if (*width == 0) {
             *width = i;
         }
         if (i > 0) {
@@ -106,7 +109,8 @@ static bool map_data_init(CellType *cells, const char *file_name, size_t height,
                 break;
             case 'P':
                 if (found_player) {
-                    perror(
+                    fprintf(
+                        stderr,
                         "cannot initialize map with more than one P character");
                     fclose(f);
                     return false;
@@ -128,7 +132,9 @@ static bool map_data_init(CellType *cells, const char *file_name, size_t height,
     fclose(f);
 
     if (!found_player) {
-        perror("file must contain one P character to initialize map");
+        fprintf(
+            stderr,
+            "file must contain exactly one P character to initialize map\n");
         return false;
     }
     return true;

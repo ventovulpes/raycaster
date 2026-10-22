@@ -74,7 +74,6 @@ bool handle_input(int *keys_down, double *mouse_movement) {
         } else if (event.type == SDL_EVENT_KEY_DOWN) {
             switch (event.key.key) {
             case SDLK_ESCAPE:
-            case SDLK_Q:
                 return false;
             case SDLK_UP:
             case SDLK_W:
