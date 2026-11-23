@@ -235,9 +235,15 @@ void fill_minimap(int frame_buffer[], const Map *map, const Player *player) {
     }
 }
 
+void render_quit_hint(SDL_Renderer *renderer) {
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+    SDL_RenderDebugText(renderer, 10.0f, 10.0f, "[ESC] TO QUIT");
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+}
+
 void render_fps_counter(SDL_Renderer *renderer, double fps) {
-    char fps_str[7];
-    snprintf(fps_str, 7, "%.2f", fps);
+    char fps_str[12];
+    snprintf(fps_str, 12, "FPS: %.2f", fps);
     SDL_RenderDebugText(renderer, 10.0f, HEIGHT - 20.0f, fps_str);
 }
 
@@ -313,6 +319,7 @@ int main(int argc, char **argv) {
         SDL_UpdateTexture(texture, NULL, frame_buffer, WIDTH * sizeof(int));
         SDL_RenderClear(renderer);
         SDL_RenderTexture(renderer, texture, NULL, NULL);
+        render_quit_hint(renderer);
         render_fps_counter(renderer, fps);
         SDL_RenderPresent(renderer);
 

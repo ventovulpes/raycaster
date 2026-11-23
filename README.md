@@ -2,8 +2,9 @@
 An implementation of a Wolfenstein-style raycaster using C.
 
 ## Usage
-* Default map: `make run`
-* Specify map: `make run FILE=<map_file_name>`
+* Default map: `make run` or `make demo`
+* Specify map: `make run FILE=<map_file_path>`
+* Build to `./build/raycaster`: `make` or `make build`
 
 ## Map File
 A .txt file with lines of equal length.  

@@ -10,6 +10,9 @@ build:
 run: build
 	./$(TARGET) $(FILE)
 
+demo: build
+	./$(TARGET) $(FILE)
+
 test: $(TEST)
 	mkdir -p build
 	cc $(CFLAGS) -Isrc $(TEST) -o build/test_main
